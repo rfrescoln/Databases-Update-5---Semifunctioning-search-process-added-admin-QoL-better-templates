@@ -7,7 +7,7 @@ conn= pymysql.connect(host='localhost', user='root', password='Rainbow.86', db='
 app = Flask(__name__)
 
 counterMatIndent = 4
-sequencecounterMatIndent = -1
+sequencecounterMatIndent = 0
 Ndays = 10
 orderidcounter = 5
 sequencecounterPurchaseOrder = 2
@@ -75,6 +75,13 @@ def ManagerHome():
     return render_template('managerhome.html')
 
 ####################################################
+#counterMatIndent = 4
+#sequencecounterMatIndent = 0
+#Ndays = 10
+#orderidcounter = 5
+#sequencecounterPurchaseOrder = 2
+#receiptID = 5
+
 @app.route('/ShopHome')
 def ShopHome():
     return render_template('shophome.html')
@@ -84,6 +91,7 @@ def ShopHome():
 def ShopSearch():
    global counterMatIndent
    global sequencecounterMatIndent
+   sequencecounterMatIndent = sequencecounterMatIndent + 1
    global Ndays
    Date_N_Days_From_Now = datetime.now() + timedelta(days=Ndays)
    a = conn.cursor()
@@ -125,6 +133,9 @@ def PurchaseOrderCreate():
         sql = 'INSERT INTO PurchaseOrder VALUES (%s, %s, %s, %s, %s)'
         a.execute(sql, (orderidcounter, sequencecounterPurchaseOrder, counterMatIndent, sequencecounterMatIndent, VendorNameSql))
         conn.commit()
+        counterMatIndent = counterMatIndent + 1
+        sequencecounterPurchaseOrder = sequencecounterPurchaseOrder + 1
+        sequencecounterMatIndent = 0
         return redirect(url_for('AddANewPurchaseOrder'))
     return render_template('purchaseordervendorfill.html')
 
@@ -142,9 +153,11 @@ def CreateGoodsReceipt():
     sqldatainsert = 'INSERT INTO GoodsReceipt VALUES (%s, %s, %s, %s, %s, %s, %s)'
     a.execute(sqldatainsert, (receiptID, orderidcounter, dateoforder.date(), 'Pending', 'Address', 'Payment', 0.00))
     conn.commit()
+    orderidcounter = orderidcounter + 1
     sql = 'SELECT * FROM GoodsReceipt WHERE ReceiptID = %s'
     a.execute(sql, (receiptID))
     results = a.fetchall()
+    receiptID = receiptID + 1
     return(redirect(url_for('ShopHome')))
 ######################################
 
